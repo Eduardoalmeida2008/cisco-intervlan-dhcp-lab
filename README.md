@@ -1,63 +1,61 @@
-# Enterprise Network Infrastructure: Inter-VLAN Routing & DHCP Services
+# Enterprise Network: Inter-VLAN Routing & Multi-Pool DHCP Implementation
 
-## 📌 Project Overview
-This project demonstrates the implementation of a segmented enterprise network using Cisco Packet Tracer. The core objective was to design a scalable architecture that isolates departments into distinct VLANs while maintaining controlled communication through a Router-on-a-Stick topology and automated IP addressing via DHCP.
+## 📌 Overview
+This repository documents a complete Layer 3 network infrastructure lab. The project focuses on segmenting a corporate network into functional VLANs, providing automated IP addressing via a centralized DHCP server on a Cisco Router, and establishing connectivity between different network segments using Router-on-a-Stick.
 
-## 🚀 Technical Features
-* **VLAN Segmentation:** Isolation of 5 different departments to improve security and network performance.
-* **Inter-VLAN Routing:** Implementation of 802.1Q encapsulation using subinterfaces on a Cisco Router.
-* **Dynamic Addressing:** Configuration of multiple DHCP pools directly on the router to automate IP assignment for each VLAN.
-* **L3 Connectivity:** Static routing between different network segments to ensure end-to-end reachability.
+## 🚀 Key Implementation Details
+* **Router-on-a-Stick (Dot1Q):** Subinterface configuration on `Gig0/0` to route traffic between 5 distinct VLANs.
+* **Centralized DHCP Server:** Multiple pools configured on the R1 router to serve IPs dynamically based on the originating VLAN.
+* **Static Routing:** Established link between R1 and R2 via the `192.168.100.0/30` network to simulate connectivity to a remote site or server farm (VLAN 50).
+* **VLAN Trunking:** Configured 802.1Q trunk links between switches to carry tagged traffic across the topology.
 
-## 🗺️ Network Topology
-The network consists of:
-- **2 Cisco Routers (2911):** Acting as the Default Gateways and DHCP Server.
-- **3 Cisco Switches (2960):** Handling access layer connectivity and VLAN tagging.
-- **End Devices:** Multiple PCs simulating different departments (Sales, HR, IT, etc.).
-
-## 📊 IP Addressing Plan
-| VLAN | Department | Subnet | Gateway |
+## 📊 Technical Addressing Plan (Based on Lab Data)
+| Interface / Subinterface | VLAN | Network | Description |
 | :--- | :--- | :--- | :--- |
-| 10 | Sales | 192.168.10.0/24 | 192.168.10.1 |
-| 20 | Marketing | 192.168.20.0/24 | 192.168.20.1 |
-| 30 | Support | 192.168.30.0/24 | 192.168.30.1 |
-| 40 | financial | 192.168.40.0/24 | 192.168.40.1 |
-| 50 | board | 192.168.50.0/24 | 192.168.50.1 |
+| Gig0/0.10 | 10 | 192.168.10.0/24 | Sales |
+| Gig0/0.20 | 20 | 192.168.20.0/24 | HR |
+| Gig0/0.30 | 30 | 192.168.30.0/24 | Finance |
+| Gig0/0.40 | 40 | 192.168.40.0/24 | IT / Management |
+| Gig0/1 (R2 Link) | - | 192.168.100.0/30 | Point-to-Point Link |
+| R2 Gig0/0 | 50 | 192.168.50.0/24 | Servers |
 
-## ⚙️ Configuration Highlights
+## ⚙️ Configuration Snippets (Verified)
 
-### 1. Router-on-a-Stick (Subinterfaces)
-```bash
+### Subinterface Configuration (R1)
+```
 interface GigabitEthernet0/0.10
  encapsulation dot1Q 10
  ip address 192.168.10.1 255.255.255.0
 !
-interface GigabitEthernet0/0.20
- encapsulation dot1Q 20
- ip address 192.168.20.1 255.255.255.0
+interface GigabitEthernet0/0.40
+ encapsulation dot1Q 40
+ ip address 192.168.40.1 255.255.255.0
 ````
 
-2. DHCP Pool Configuration
-``ip dhcp pool VLAN_10_SALES
+DHCP Pool Setup (R1)
+```
+ip dhcp pool VLAN_10
  network 192.168.10.0 255.255.255.0
  default-router 192.168.10.1
- dns-server 8.8.8.8``
-
-
- 🧪 Verification & Troubleshooting
-````The following commands were used to verify the infrastructure:
-
-show ip interface brief: To verify subinterface status.
-
-show vlan brief: To confirm VLAN assignments on switches.
-
-show ip route: To validate the routing table and static routes.
-
-ICMP Connectivity: Successful pings between all VLANs were achieved, confirming the Router-on-a-Stick functionality.
+!
+ip dhcp pool VLAN_40
+ network 192.168.40.0 255.255.255.0
+ default-router 192.168.40.1
 ````
+Inter-Router Static Route
+````
+! On R1: Reaching the Server Network (VLAN 50) via R2
+ip route 192.168.50.0 255.255.255.0 192.168.100.2
+````
+🧪 Testing and Validation
+```
+DHCP Acknowledgement: Verified on PCs (e.g., PC-VLAN40 received 192.168.40.2 via DHCP).
 
-📸 Lab Screenshots
-(Insert your best screenshots here, such as the topology diagram and the successful ping tests)´´´´
+Routing Table: show ip route confirms the existence of connected subnets and the static route to the remote segment.
 
-Developed by [Eduardo] Network Engineering Student | CCNA Candidate
-
+Connectivity: Successful ICMP echo requests (pings) between PC-VLAN10 and Server-VLAN50, validating the entire path.
+```
+📸 Evidence
+```
+(Upload your screenshots here, specifically the 'show ip interface brief' and the successful ping tests you've captured)
+````
