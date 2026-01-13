@@ -35,15 +35,16 @@ interface GigabitEthernet0/0.10
 interface GigabitEthernet0/0.20
  encapsulation dot1Q 20
  ip address 192.168.20.1 255.255.255.0
+````
 
 2. DHCP Pool Configuration
-Bash
-
+   
 ip dhcp pool VLAN_10_SALES
  network 192.168.10.0 255.255.255.0
  default-router 192.168.10.1
  dns-server 8.8.8.8
-🧪 Verification & Troubleshooting
+
+ 🧪 Verification & Troubleshooting
 The following commands were used to verify the infrastructure:
 
 show ip interface brief: To verify subinterface status.
